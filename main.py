@@ -4,6 +4,7 @@ import struct
 
 
 class heapNode:
+
   def __init__(self, char, freq):
     self.char = char
     self.freq = freq
@@ -13,7 +14,9 @@ class heapNode:
   def __lt__(self, other):
     return self.freq < other.freq
 
+
 class huffmanCoding:
+
   def __init__(self, path=""):
     self.path = path
     self.frequency = {}
@@ -31,39 +34,51 @@ class huffmanCoding:
       temp_heap_node = heapNode(key, self.frequency[key])
       heapq.heappush(self.heap, temp_heap_node)
 
-  def buildTree(self): #Дерево
-    pass
+  def buildTree(self):  #Дерево
+    while len(self.heap) > 1:
+      min1 = heapq.heappop(self.heap)
+      min2 = heapq.heappop(self.heap)
+      tempNode = heapNode(None, min1.freq + min2.freq)
+      tempNode.left = min1
+      tempNode.right = min2
+      heapq.heappush(self.heap, tempNode)
 
-  def generateCodesHelper(self, root, curr_code): 
-    pass
+  def generateCodesHelper(self, root, curr_code):
+    if not root:
+      return
+    if root.char:
+      self.codes[root.char] = curr_code
+      self.reverse_codes[curr_code] = root.char
+    self.generateCodesHelper(root.left, curr_code + '0')
+    self.generateCodesHelper(root.right, curr_code + '1')
 
   def generateCodes(self):
-    pass
+    root = heapq.heappop(self.heap)
+    self.generateCodesHelper(root, '')
 
   def encodedText(self, input):
     pass
-    
+
   def getPaddedEncodedText(self, input):
     pass
 
   def get_byte_encoded(self, padded_encoded_text):
-   pass
+    pass
 
   def compress(self):
     pass
 
-  
   def removePadding(self, input):
-   pass
+    pass
 
   def decode(self, input):
-   pass
+    pass
 
-  def write_header(self, file): 
+  def write_header(self, file):
     pass
 
   def parse_header(self, input):  #Достает информацию
-   pass
+    pass
 
   def rawbytes(self, s):
     outlist = []
@@ -81,6 +96,7 @@ class huffmanCoding:
 
   def decompress(self, input):
     pass
+
 
 Huffman = huffmanCoding()
 Huffman.compress()
