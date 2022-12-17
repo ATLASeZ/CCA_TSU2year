@@ -57,13 +57,29 @@ class huffmanCoding:
     self.generateCodesHelper(root, '')
 
   def encodedText(self, input):
-    pass
+    output = ''
+    for ele in input:
+      output += self.codes[ele]
+    return output
 
   def getPaddedEncodedText(self, input):
-    pass
+    length = len(input)
+    required_padding = 8 - length % 8
+    input = input + '0' * required_padding
+    pad_info = '{0:08b}'.format(required_padding)
+    input = pad_info + input
+    return input
 
   def get_byte_encoded(self, padded_encoded_text):
-    pass
+    length = len(padded_encoded_text)
+    if length % 8 != 0:
+      print('Improper padding')
+      exit(0)
+    output = bytearray()
+    for i in range(0, length, 8):
+      byte = padded_encoded_text[i:i + 8]
+      output.append(int(byte, 2))
+    return output
 
   def compress(self):
     pass
