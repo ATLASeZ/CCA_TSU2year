@@ -82,19 +82,54 @@ class huffmanCoding:
     return output
 
   def compress(self):
-    pass
+    filename, extension = os.path.splitext(self.path)
+    output_path = filename + '_compressed.bin'
+    with open(self.path, 'r') as file, open(output_path, 'wb') as output:
+      text = file.read() 
+      text = text.rstrip()  
+      self.obtainFrequencies(text)  
+      self.constructHeap()  
+      self.buildTree()  
+      self.generateCodes() 
+      encoded_text = self.encodedText(text) 
+      padded_encoded_text = self.getPaddedEncodedText(encoded_text)  
+      encoded_text_in_bits = self.get_byte_encoded(padded_encoded_text)  
+      self.write_header(output)
+      output.write(bytes(encoded_text_in_bits)) 
+    print('Compressesd')
+    return output_path
 
   def removePadding(self, input):
-    pass
+    pad_info = input[:8]
+    input = input[8:]
+    pad_info = int(pad_info, 2)
+    input = input[:-1 * pad_info]
+    return input
 
   def decode(self, input):
-    pass
+    output = ''
+    curr_code = ''
+    for ele in input:
+      curr_code += ele
+      if curr_code in self.reverse_codes:
+        output += self.reverse_codes[curr_code]
+        curr_code = ''
+    return output
 
   def write_header(self, file):
-    pass
+    col_letters = (len(self.frequency.keys()) - 1).to_bytes(1, byteorder='little')
+    file.write(col_letters)
+    for letter, code in self.frequency.items():
+      file.write(self.rawbytes(letter))
+      file.write(code.to_bytes(4, byteorder='little'))
 
   def parse_header(self, input):  #Достает информацию
-    pass
+    col_letters = input[0] + 1
+    header = input[1:5 * col_letters + 1]
+    dict_chars = dict()
+    for i in range(col_letters):
+      dict_chars[chr(header[i * 5])] = int.from_bytes(header[i * 5 + 1:i * 5 + 5], byteorder='little')
+    return dict_chars
 
   def rawbytes(self, s):
     outlist = []
@@ -111,9 +146,28 @@ class huffmanCoding:
     return b''.join(outlist)
 
   def decompress(self, input):
-    pass
+    filename, extension = os.path.splitext(self.path)
+    output_path = filename + '2.txt'
+    with open(input, 'rb') as file, open(output_path, 'w') as output:
+      ctx = file.read()
+      ch_number = ctx[0] + 1
+      body = ctx[5 * ch_number + 1:]
+      self.frequency = self.parse_header(ctx)
+      self.constructHeap()
+      self.buildTree()
+      self.generateCodes()
+      bit_string = ''
+      for i in range(len(body)):
+        byte = body[i]
+        bits = bin(byte)[2:].rjust(8, '0')
+        bit_string += bits
+      bit_string = self.removePadding(bit_string)
+      decoded_text = self.decode(bit_string)
+      output.write(decoded_text)
+    print('Decompressed')
+    return output_path
 
 
-Huffman = huffmanCoding()
+Huffman = huffmanCoding("1.txt")
 Huffman.compress()
-Huffman.decompress()
+Huffman.decompress("1_compressed.bin")
